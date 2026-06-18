@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-06-18T01:27:00.055548+00:00",
+  "commit": "2c0223f1",
+  "diagnostic_logd": [
+    "diagnostic\\build-2c0223f1-part001.logd",
+    "diagnostic\\build-2c0223f1-part002.logd",
+    "diagnostic\\build-2c0223f1-part003.logd",
+    "diagnostic\\build-2c0223f1-part004.logd",
+    "diagnostic\\build-2c0223f1-part005.logd",
+    "diagnostic\\build-2c0223f1-part006.logd",
+    "diagnostic\\build-2c0223f1-part007.logd",
+    "diagnostic\\build-2c0223f1-part008.logd",
+    "diagnostic\\build-2c0223f1-part009.logd",
+    "diagnostic\\build-2c0223f1-part010.logd",
+    "diagnostic\\build-2c0223f1-part011.logd",
+    "diagnostic\\build-2c0223f1-part012.logd",
+    "diagnostic\\build-2c0223f1-part013.logd"
+  ],
+  "diagnostic_logd_error": null,
+  "message_blocker": null,
+  "chunked": true,
+  "chunk_size_bytes": 41943040,
+  "password": "605295859ea12785c7ab",
+  "decrypt_command": "encryptly unpack diagnostic\\build-2c0223f1.logd <outdir> --password 605295859ea12785c7ab",
+  "total_modules": 1,
+  "passed": 1,
+  "failed": 0,
+  "modules": [
+    {
+      "name": "market",
+      "status": "PASS",
+      "elapsed_seconds": 7.077,
+      "artifact": "C:\\Users\\GP GAMERS\\Documents\\Codex\\2026-06-05\\eres-mi-agente-aut-nomo-de\\work\\TentOfTrials\\market\\market",
+      "output": "go: downloading go.uber.org/zap v1.27.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/gorilla/websocket v1.5.3\ngo: downloading go.uber.org/multierr v1.10.0"
+    }
+  ],
+  "pr_note": "Include the encrypted diagnostic logd artifact(s): diagnostic\\build-2c0223f1-part001.logd, diagnostic\\build-2c0223f1-part002.logd, diagnostic\\build-2c0223f1-part003.logd, diagnostic\\build-2c0223f1-part004.logd, diagnostic\\build-2c0223f1-part005.logd, diagnostic\\build-2c0223f1-part006.logd, diagnostic\\build-2c0223f1-part007.logd, diagnostic\\build-2c0223f1-part008.logd, diagnostic\\build-2c0223f1-part009.logd, diagnostic\\build-2c0223f1-part010.logd, diagnostic\\build-2c0223f1-part011.logd, diagnostic\\build-2c0223f1-part012.logd, diagnostic\\build-2c0223f1-part013.logd. The encrypted .logd is the required diagnostic content for PR review; this JSON file is metadata. Maintainers may ask you to remove these diagnostic artifacts before merging."
+}
