@@ -56,6 +56,46 @@ class IndependentLogFixtureTests(unittest.TestCase):
         entry = TextLogParser().parse("unsupported legacy record")
         self.assertEqual((entry["timestamp"],entry["level"],entry["service"],entry["format"]), (None,"unknown",None,"text"))
 
+    def test_json_iso_timestamp_is_usable_by_aggregation_and_summary(self):
+        for stamp in ["2024-01-01T00:00:06Z", "2024-01-01T02:00:06+02:00", "2024-01-01T00:00:06"]:
+            with self.subTest(stamp=stamp):
+                raw = '{"timestamp":"' + stamp + '","level":"INFO","service":"orders","message":"ready"}'
+                agg = LogAggregator()
+                self.assertTrue(agg._parse_line(raw))
+                self.assertEqual(agg.entries[0]["timestamp"], 1704067206)
+                self.assertEqual(agg.entries[0]["fields"]["timestamp"], stamp)
+                self.assertEqual(agg.get_summary()["time_range"]["start"], "2024-01-01T00:00:06+00:00")
+                self.assertEqual(agg.get_summary()["by_hour"], {"2024-01-01T00:00":1})
+
+    def test_invalid_json_timestamp_does_not_abort_aggregation(self):
+        agg = LogAggregator()
+        self.assertTrue(agg._parse_line('{"timestamp":"not-a-date","message":"legacy record"}'))
+        self.assertIsNone(agg.entries[0]["timestamp"])
+        self.assertEqual(agg.entries[0]["fields"]["timestamp"], "not-a-date")
+        self.assertIsNone(agg.get_summary()["time_range"])
+
+    def test_json_cli_accepts_iso_and_invalid_timestamp_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp)/"iso.jsonl"
+            source.write_text('{"timestamp":"2024-01-01T00:00:06Z","service":"orders","message":"ready"}\n{"timestamp":"not-a-date","service":"orders","message":"legacy"}\n')
+            report = Path(tmp)/"report.json"
+            result = subprocess.run([sys.executable, str(ROOT/"tools/log_aggregator.py"), "--input", str(source), "--output", str(report)], capture_output=True, text=True, timeout=15)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            data = json.loads(report.read_text())
+            self.assertEqual(data["summary"]["total_entries"], 2)
+            self.assertEqual(data["summary"]["time_range"]["start"], "2024-01-01T00:00:06+00:00")
+            self.assertEqual([entry["timestamp"] for entry in data["entries"]], [1704067206, None])
+
+    def test_cli_without_usable_timestamps_still_exports_report(self):
+        for content, expected_count in [('{"timestamp":"not-a-date","message":"legacy"}\n', 1), ("", 0)]:
+            with self.subTest(content=content), tempfile.TemporaryDirectory() as tmp:
+                source = Path(tmp)/"input.log"; source.write_text(content)
+                report = Path(tmp)/"report.json"
+                result = subprocess.run([sys.executable,str(ROOT/"tools/log_aggregator.py"),"--input",str(source),"--output",str(report)],capture_output=True,text=True,timeout=15)
+                self.assertEqual(result.returncode,0,result.stderr)
+                self.assertEqual(json.loads(report.read_text())["summary"]["total_entries"],expected_count)
+                self.assertIn("N/A to N/A",result.stdout)
+
     def test_aggregator_selects_nginx_before_generic_text(self):
         agg = LogAggregator()
         self.assertTrue(agg._parse_line(lines("nginx.log")[0]))

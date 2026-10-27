@@ -246,6 +246,16 @@ class LogAggregator:
             if entry:
                 self.entries.append(entry)
                 ts = entry.get('timestamp')
+                # Normalize JSON dates for timeline consumers, preserving fields.
+                if isinstance(ts, str):
+                    try:
+                        parsed = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                        if parsed.tzinfo is None:
+                            parsed = parsed.replace(tzinfo=timezone.utc)
+                        ts = int(parsed.timestamp())
+                    except (ValueError, OverflowError):
+                        ts = None
+                    entry['timestamp'] = ts
                 if ts:
                     hour = datetime.fromtimestamp(ts, tz=timezone.utc).strftime('%Y-%m-%dT%H:00')
                     self.hourly_counts[hour] += 1
@@ -447,7 +457,7 @@ def main():
     summary = aggregator.get_summary()
     print(f"\nSummary:")
     print(f"  Total entries: {summary['total_entries']:,}")
-    print(f"  Time range: {summary.get('time_range', {}).get('start', 'N/A')} to {summary.get('time_range', {}).get('end', 'N/A')}")
+    print(f"  Time range: {(summary.get('time_range') or {}).get('start', 'N/A')} to {(summary.get('time_range') or {}).get('end', 'N/A')}")
     print(f"  Error rate: {summary.get('error_rate', 0)}%")
     print(f"  By level: {', '.join(f'{k}={v}' for k, v in summary.get('by_level', {}).items())}")
     print(f"  By service: {', '.join(f'{k}={v}' for k, v in summary.get('by_service', {}).items())}")
