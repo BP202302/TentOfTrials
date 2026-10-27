@@ -1,0 +1,2 @@
+{"timestamp":1704067200,"level":"ERROR","service":"payments","message":"Declined charge","request_id":"synthetic-7","attempt":2}
+{"time":1704067203,"severity":"DEBUG","app":"search","event":"Cache warmed","cache_hit":false}
