@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-10-27T08:43:43.723161+00:00",
+  "commit": "a43de085",
+  "diagnostic_logd": "diagnostic/build-a43de085.logd",
+  "diagnostic_logd_error": null,
+  "chunked": false,
+  "chunk_size_bytes": null,
+  "password": "9bf0b2c30b67c2b40e8b",
+  "decrypt_command": "encryptly unpack diagnostic/build-a43de085.logd <outdir> --password 9bf0b2c30b67c2b40e8b",
+  "total_modules": 10,
+  "passed": 1,
+  "failed": 9,
+  "modules": [
+    {
+      "name": "backend",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'cargo'"
+    },
+    {
+      "name": "frontend",
+      "status": "FAIL",
+      "elapsed_seconds": 1.588,
+      "artifact": null,
+      "output": "npm install failed:\nnpm WARN EBADENGINE Unsupported engine {\nnpm WARN EBADENGINE   package: 'react-router@7.17.0',\nnpm WARN EBADENGINE   required: { node: '>=20.0.0' },\nnpm WARN EBADENGINE   current: { node: 'v18.19.1', npm: '9.2.0' }\nnpm WARN EBADENGINE }\nnpm WARN EBADENGINE Unsupported engine {\nnpm WARN EBADENGINE   package: 'react-router-dom@7.17.0',\nnpm WARN EBADENGINE   required: { node: '>=20.0.0' },\nnpm WARN EBADENGINE   current: { node: 'v18.19.1', npm: '9.2.0' }\nnpm WARN EBADENGINE }\nnpm ERR! code ENOTCACHED\nnpm ERR! request to https://registry.npmjs.org/zustand/-/zustand-5.0.14.tgz failed: cache mode is 'only-if-cached' but no cached response is available.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     /tmp/validation-home/.npm/_logs/2026-10-27T08_43_36_809Z-debug-0.log\n"
+    },
+    {
+      "name": "market",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'go'"
+    },
+    {
+      "name": "frailbox",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'make'"
+    },
+    {
+      "name": "engine",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'cmake'"
+    },
+    {
+      "name": "compliance",
+      "status": "PASS",
+      "elapsed_seconds": 1.81,
+      "artifact": "/work/compliance/build",
+      "output": "Note: ComplianceAuditor.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details."
+    },
+    {
+      "name": "v2-market-stream",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'ruby'"
+    },
+    {
+      "name": "nfc-scanner",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'luac'"
+    },
+    {
+      "name": "openapi-haskell",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'ghc'"
+    },
+    {
+      "name": "openapi-tools",
+      "status": "FAIL",
+      "elapsed_seconds": 0,
+      "artifact": null,
+      "output": "Command not found: [Errno 2] No such file or directory: 'luac'"
+    }
+  ],
+  "pr_note": "Include the encrypted diagnostic logd artifact(s): diagnostic/build-a43de085.logd. The encrypted .logd is the required diagnostic content for PR review; this JSON file is metadata. Maintainers may ask you to remove these diagnostic artifacts before merging."
+}
