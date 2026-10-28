@@ -996,3 +996,16 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ![](https://github.com/lobster-trap/TentOfTrials/blob/main/docs/images/frame-handle.png?raw=true)
+
+## Build diagnostic regression tests
+
+Run `python3 -m unittest discover -s tests -v` (Python standard library only).
+The tests call the real diagnostic report and archive-finalization functions,
+using temporary directories and a fake pack subprocess; they need no network,
+compiler, or installed encryptly binary. They cover mixed module summaries,
+missing/failed archive generation, cleanup of partial archives, and lossless
+chunk ordering, including empty and exact-size boundary files. The fake pack
+process is test data, not evidence of a real encrypted build artifact.
+
+Run `python3 build.py` separately to generate the actual PR diagnostic bundle;
+its module results reflect the toolchains available on your machine.
