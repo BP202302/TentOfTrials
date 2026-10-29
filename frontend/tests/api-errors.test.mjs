@@ -161,3 +161,28 @@ test('aborted error body keeps abort normalization across realms', async () => {
     });
   });
 });
+
+test('nested errors retain envelope request ID, path, details and suggestion', async () => {
+  await check(async () => json({ error: { message: 'Denied' }, request_id: 'outer-id',
+    path: '/server/path', details: { trace: 'outer' }, suggestion: 'Contact support',
+    timestamp: '2026-10-29T00:00:00Z' }, 403), async ({ api }) => {
+    await assert.rejects(api.post('/request/path'), e => {
+      assert.equal(e.requestId, 'outer-id'); assert.equal(e.path, '/server/path');
+      assert.equal(e.details.trace, 'outer'); assert.equal(e.suggestion, 'Contact support');
+      assert.equal(e.timestamp, '2026-10-29T00:00:00Z'); return true;
+    });
+  });
+});
+
+test('nested metadata takes precedence while envelope details remain available', async () => {
+  await check(async () => json({ error: { message: 'Denied', path: '/nested',
+    requestId: 'nested-id', details: { shared: 'nested' } },
+    path: '/outer', requestId: 'outer-id', details: { shared: 'outer', extra: true } }, 403),
+    async ({ api }) => {
+      await assert.rejects(api.post('/request'), e => {
+        assert.equal(e.requestId, 'nested-id'); assert.equal(e.path, '/nested');
+        assert.equal(e.details.shared, 'nested'); assert.equal(e.details.extra, true);
+        return true;
+      });
+    });
+});

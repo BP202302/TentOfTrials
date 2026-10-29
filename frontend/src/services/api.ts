@@ -365,7 +365,8 @@ async function parseHttpError(response: Response, path: string): Promise<ApiErro
   const nested = errorRecord(envelope.error);
   const payload = Object.keys(nested).length ? nested : envelope;
   const stringField = (key: string): string | undefined =>
-    typeof payload[key] === 'string' ? payload[key] as string : undefined;
+    typeof payload[key] === 'string' ? payload[key] as string
+      : typeof envelope[key] === 'string' ? envelope[key] as string : undefined;
   const retryAfter = response.headers.get('Retry-After');
   const message = stringField('message')
     || (typeof envelope.error === 'string' ? envelope.error : undefined)
@@ -374,7 +375,7 @@ async function parseHttpError(response: Response, path: string): Promise<ApiErro
   return {
     code: response.status,
     message,
-    details: { ...errorRecord(payload.details), responseBody: body },
+    details: { ...errorRecord(envelope.details), ...errorRecord(payload.details), responseBody: body },
     requestId: stringField('requestId') || stringField('request_id')
       || (typeof envelope.requestId === 'string' ? envelope.requestId : undefined)
       || response.headers.get('X-Request-ID') || undefined,
