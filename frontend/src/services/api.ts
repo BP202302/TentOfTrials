@@ -226,13 +226,15 @@ async function request<T>(
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
       requestConfig.signal = controller.signal;
 
       const response = await fetch(requestConfig.url, requestConfig);
-      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new HttpResponseError(await parseHttpError(response, path));
+      }
 
       const responseData = await parseResponse<T>(response);
 
@@ -253,6 +255,8 @@ async function request<T>(
       }
 
       break;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -331,7 +335,61 @@ function extractPagination(headers: Headers): PaginationInfo | undefined {
   };
 }
 
+class HttpResponseError extends Error {
+  constructor(readonly apiError: ApiError) {
+    super(apiError.message);
+    this.name = 'HttpResponseError';
+  }
+}
+
+function errorRecord(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown> : {};
+}
+
+async function parseHttpError(response: Response, path: string): Promise<ApiError> {
+  // Read once; malformed JSON and non-JSON errors must retain their HTTP status.
+  let body: unknown;
+  try {
+    const text = await response.text();
+    body = text;
+    if (text) {
+      try { body = JSON.parse(text); } catch { /* Preserve the text error body. */ }
+    }
+  } catch (error) {
+    // An abort is still a timeout, rather than an HTTP payload parse failure.
+    if (errorRecord(error).name === 'AbortError') throw error;
+    body = { readError: error instanceof Error ? error.message : String(error) };
+  }
+  const envelope = errorRecord(body);
+  const nested = errorRecord(envelope.error);
+  const payload = Object.keys(nested).length ? nested : envelope;
+  const stringField = (key: string): string | undefined =>
+    typeof payload[key] === 'string' ? payload[key] as string : undefined;
+  const retryAfter = response.headers.get('Retry-After');
+  const message = stringField('message')
+    || (typeof envelope.error === 'string' ? envelope.error : undefined)
+    || (typeof body === 'string' && body ? body : undefined)
+    || response.statusText || ('HTTP ' + response.status);
+  return {
+    code: response.status,
+    message,
+    details: { ...errorRecord(payload.details), responseBody: body },
+    requestId: stringField('requestId') || stringField('request_id')
+      || (typeof envelope.requestId === 'string' ? envelope.requestId : undefined)
+      || response.headers.get('X-Request-ID') || undefined,
+    path: stringField('path') || path,
+    timestamp: stringField('timestamp'),
+    suggestion: stringField('suggestion') || (response.status === 401
+      ? 'Please sign in again.'
+      : response.status === 429 && retryAfter
+        ? 'Please retry after ' + retryAfter + '.'
+        : 'Please try again later or contact support.'),
+  };
+}
+
 function normalizeError(error: Error | null): ApiError {
+  if (error instanceof HttpResponseError) return error.apiError;
   if (!error) {
     return { code: 0, message: 'Unknown error' };
   }
